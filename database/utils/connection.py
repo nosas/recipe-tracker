@@ -73,3 +73,23 @@ class RecipeDBAccess:
             Base.metadata.drop_all(self._engine)
         else:
             print("Tables not dropped, force=True to drop tables")
+
+    def insert_one(self, obj) -> None:
+        """Inserts a single object into the database
+
+        Args:
+            obj (Base): The object to insert
+        """
+        with self.get_session() as session:
+            session.add(obj)
+            session.commit()
+
+    def insert_many(self, objs: list) -> None:
+        """Inserts multiple objects into the database
+
+        Args:
+            objs (list): The objects to insert
+        """
+        with self.get_session() as session:
+            session.add_all(objs)
+            session.commit()

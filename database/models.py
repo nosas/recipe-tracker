@@ -1,5 +1,5 @@
-from sqlalchemy import DateTime, ForeignKey, Integer, String, Text
-from sqlalchemy.orm import DeclarativeBase, mapped_column, relationship
+from sqlalchemy import DateTime, ForeignKey, Integer, String, Text, func
+from sqlalchemy.orm import DeclarativeBase, Session, mapped_column, relationship
 
 from .mixins import IDMixin
 
@@ -18,7 +18,8 @@ class Base(DeclarativeBase):
 class Dish(IDMixin, Base):
     __tablename__ = "dishes"
 
-    created_at = mapped_column(DateTime)
+    name = mapped_column(String(255), nullable=False)
+    created_at = mapped_column(DateTime, nullable=False, server_default=func.now())
 
     recipes = relationship("DishRecipe", back_populates="dish")
     reviews = relationship("Review", back_populates="dish")
