@@ -1,5 +1,5 @@
 from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import Session, sessionmaker
 
 TEST_DB = "test_db"
 PROD_DB = "prod_db"
@@ -50,7 +50,7 @@ class RecipeDBAccess:
             cls._instance = cls(username=username, password=password, prod_db=prod_db)
         return cls._instance
 
-    def get_session(self) -> sessionmaker:
+    def get_session(self) -> Session:
         """Returns a session for the database
 
         Returns:

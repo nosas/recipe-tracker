@@ -1,8 +1,7 @@
-import pytest
-from sqlalchemy import inspect, text
+from sqlalchemy import inspect
 
-from database.utils.connection import RecipeDBAccess
 from database.models import SCHEMA
+from database.utils.connection import RecipeDBAccess
 
 
 def table_exists(test_db: RecipeDBAccess, table_name: str) -> bool:
@@ -11,6 +10,7 @@ def table_exists(test_db: RecipeDBAccess, table_name: str) -> bool:
 
 
 def test_create_tables(test_db):
+    """Verify that all tables are created"""
     test_db.create_tables()
     for table in [
         "recipes",
@@ -26,6 +26,7 @@ def test_create_tables(test_db):
 
 
 def test_drop_tables(test_db):
+    """Verify that all tables are dropped"""
     test_db.drop_tables(force=True)
     for table in [
         "recipes",
