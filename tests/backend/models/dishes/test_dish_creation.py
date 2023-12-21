@@ -56,17 +56,44 @@ def test_create_dishes_with_custom_ids(test_db):
 
 
 def test_update_dish(test_db):
-    """Verify that a dish can be updated"""
+    """Verify that a dish can be updated with upsert"""
     dish = Dish(name="test_dish")
     test_db.insert_one(dish)
+
     with test_db.get_session() as session:
-        result = session.query(Dish).filter(Dish.name == "test_dish").one_or_none()
+        result = session.query(Dish).filter(Dish.id == 1).one_or_none()
         assert result is not None
     validate_dish(dish=result, name="test_dish", id=1)
 
     dish.name = "test_dish_2"
-    test_db.upsert(dish)
+    updated_dish = test_db.upsert(dish)
+    validate_dish(dish=updated_dish, name="test_dish_2", id=1)
+
     with test_db.get_session() as session:
-        result = session.query(Dish).filter(Dish.name == "test_dish_2").one_or_none()
+        result = session.query(Dish).filter(Dish.id == 1).one_or_none()
         assert result is not None
-    validate_dish(dish=result, name="test_dish_2", id=1)
+    validate_dish(dish=result, name=updated_dish.name, id=1)
+
+
+def test_upsert_dish(test_db):
+    """Verify that a dish can be inserted with upsert, and then updated with upsert"""
+    dish = Dish(name="test_dish")
+    dish = test_db.upsert(dish)
+    validate_dish(dish=dish, name="test_dish", id=1)
+
+    with test_db.get_session() as session:
+        result = session.query(Dish).filter(Dish.id == 1).one_or_none()
+        assert result is not None
+    validate_dish(dish=result, name="test_dish", id=1)
+
+    dish.name = "test_dish_2"
+    updated_dish = test_db.upsert(dish)
+    validate_dish(dish=updated_dish, name="test_dish_2", id=1)
+
+    with test_db.get_session() as session:
+        result2 = session.query(Dish).filter(Dish.id == 1).one_or_none()
+        assert result2 is not None
+        # Verify there is no new dish created
+        empty_result = session.query(Dish).filter(Dish.id == 2).one_or_none()
+        assert empty_result is None
+    validate_dish(dish=result2, name="test_dish_2", id=1)
