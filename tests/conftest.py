@@ -1,10 +1,11 @@
+from typing import Any, Generator
 import pytest
 
 from database.utils.connection import RecipeDBAccess
 
 
 @pytest.fixture
-def test_db() -> RecipeDBAccess:
+def test_db() -> Generator[RecipeDBAccess, Any, Any]:
     """Returns a test database connection"""
     db = RecipeDBAccess.get_instance(
         username="test_user",
