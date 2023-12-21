@@ -1,5 +1,9 @@
+from typing import Sequence, Type
+
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session, sessionmaker
+
+from database.schema.models import Base
 
 TEST_DB = "test_db"
 PROD_DB = "prod_db"
@@ -28,14 +32,14 @@ class RecipeDBAccess:
         print(f"Connecting to {db} database")
         self._engine = create_engine(
             f"postgresql+psycopg2://{username}:{password}@localhost/{db}",
-            echo=True,
+            echo=False,
         )
         self._Session = sessionmaker(bind=self._engine)
 
     @classmethod
     def get_instance(
-        cls: "RecipeDBAccess", username: str, password: str, prod_db: bool = False
-    ):
+        cls: Type["RecipeDBAccess"], username: str, password: str, prod_db: bool = False
+    ) -> "RecipeDBAccess":
         """Returns the singleton instance of the class
 
         Args:
@@ -60,21 +64,17 @@ class RecipeDBAccess:
 
     def create_tables(self) -> None:
         """Creates the tables in the database"""
-        from database.models import Base, Recipe
-
         Base.metadata.create_all(self._engine)
         print("Tables created")
 
     def drop_tables(self, force: bool = False) -> None:
         """Drops the tables in the database"""
-        from database.models import Base, Recipe
-
         if force:
             Base.metadata.drop_all(self._engine)
         else:
             print("Tables not dropped, force=True to drop tables")
 
-    def insert_one(self, obj) -> None:
+    def insert_one(self, obj: Base) -> None:
         """Inserts a single object into the database
 
         Args:
@@ -84,11 +84,11 @@ class RecipeDBAccess:
             session.add(obj)
             session.commit()
 
-    def insert_many(self, objs: list) -> None:
+    def insert_many(self, objs: Sequence[Type[Base]]) -> None:
         """Inserts multiple objects into the database
 
         Args:
-            objs (list): The objects to insert
+            objs (Sequence[Type[Base]]): The objects to insert
         """
         with self.get_session() as session:
             session.add_all(objs)

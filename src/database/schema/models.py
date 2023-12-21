@@ -1,5 +1,5 @@
 from sqlalchemy import DateTime, ForeignKey, Integer, String, Text, func
-from sqlalchemy.orm import DeclarativeBase, Session, mapped_column, relationship
+from sqlalchemy.orm import DeclarativeBase, mapped_column, relationship
 
 from .mixins import IDMixin
 

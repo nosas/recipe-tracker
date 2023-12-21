@@ -1,6 +1,6 @@
 from sqlalchemy import inspect
 
-from database.models import SCHEMA
+from database.schema.models import SCHEMA
 from database.utils.connection import RecipeDBAccess
 
 

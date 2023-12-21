@@ -1,8 +1,10 @@
 from sqlalchemy import text
 from sqlalchemy.orm.session import Session
 
+from database.utils.connection import RecipeDBAccess
 
-def test_get_session(test_db):
+
+def test_get_session(test_db: RecipeDBAccess):
     """Verify that a session is returned and can be used"""
     assert isinstance(test_db.get_session(), Session)
     session = test_db.get_session()
