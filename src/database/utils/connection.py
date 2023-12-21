@@ -84,7 +84,7 @@ class RecipeDBAccess:
             session.add(obj)
             session.commit()
 
-    def insert_many(self, objs: Sequence[Type[Base]]) -> None:
+    def insert_many(self, objs: Sequence[Base]) -> None:
         """Inserts multiple objects into the database
 
         Args:
