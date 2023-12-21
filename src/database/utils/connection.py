@@ -93,3 +93,13 @@ class RecipeDBAccess:
         with self.get_session() as session:
             session.add_all(objs)
             session.commit()
+
+    def upsert(self, obj: Base) -> None:
+        """Inserts or updates an object in the database
+
+        Args:
+            obj (Base): The object to insert or update
+        """
+        with self.get_session() as session:
+            session.merge(obj)
+            session.commit()
