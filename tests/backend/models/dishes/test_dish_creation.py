@@ -1,5 +1,4 @@
 from database.schema.models import Dish
-from database.utils.connection import RecipeDBAccess
 
 
 def validate_dish(dish: Dish, name: str, id: int):
@@ -9,7 +8,7 @@ def validate_dish(dish: Dish, name: str, id: int):
     assert dish.id == id
 
 
-def test_create_dish(test_db: RecipeDBAccess):
+def test_create_dish(test_db):
     """Verify that a dish can be created"""
     dish = Dish(name="test_dish")
     test_db.insert_one(dish)
@@ -19,7 +18,7 @@ def test_create_dish(test_db: RecipeDBAccess):
     validate_dish(dish=result, name="test_dish", id=1)
 
 
-def test_create_dish_with_custom_id(test_db: RecipeDBAccess):
+def test_create_dish_with_custom_id(test_db):
     """Verify that a dish cannot be created with a custom id"""
     dish = Dish(id=10, name="test_dish")
     test_db.insert_one(dish)
@@ -29,7 +28,7 @@ def test_create_dish_with_custom_id(test_db: RecipeDBAccess):
     validate_dish(dish=result, name="test_dish", id=1)
 
 
-def test_create_dishes(test_db: RecipeDBAccess):
+def test_create_dishes(test_db):
     """Verify that multiple dishes can be created"""
     dishes = [Dish(name="test_dish"), Dish(name="test_dish_2")]
     test_db.insert_many(dishes)
@@ -40,7 +39,7 @@ def test_create_dishes(test_db: RecipeDBAccess):
     validate_dish(dish=result[1], name="test_dish_2", id=2)
 
 
-def test_create_dishes_with_custom_ids(test_db: RecipeDBAccess):
+def test_create_dishes_with_custom_ids(test_db):
     """Verify that multiple dishes and their ids are not affected by custom ids"""
     dishes = [
         Dish(id=2, name="test_dish"),
@@ -56,7 +55,7 @@ def test_create_dishes_with_custom_ids(test_db: RecipeDBAccess):
     validate_dish(dish=result[2], name="test_dish_3", id=3)
 
 
-def test_update_dish(test_db: RecipeDBAccess):
+def test_update_dish(test_db):
     """Verify that a dish can be updated"""
     dish = Dish(name="test_dish")
     test_db.insert_one(dish)
