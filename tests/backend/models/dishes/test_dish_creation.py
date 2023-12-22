@@ -1,3 +1,6 @@
+import pytest
+from sqlalchemy.exc import IntegrityError
+
 from database.schema.models import Dish
 
 
@@ -97,3 +100,14 @@ def test_upsert_dish(test_db):
         empty_result = session.query(Dish).filter(Dish.id == 2).one_or_none()
         assert empty_result is None
     validate_dish(dish=result2, name="test_dish_2", id=1)
+
+
+def test_update_dish_with_existing_id(test_db):
+    """Verify that a dish cannot be updated to violate a unique constraint"""
+    _dishes = [Dish(name="test_dish"), Dish(name="test_dish_2")]
+    dishes = [test_db.upsert(dish) for dish in _dishes]
+
+    # Update dish 1 with dish 2's id
+    dishes[0].id = 2
+    with pytest.raises(IntegrityError):
+        test_db.upsert(dishes[0])
