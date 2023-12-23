@@ -12,7 +12,7 @@ def layout():
     return html.Div(
         [
             dcc.Input(id="dish-name", type="text", placeholder="Enter dish name"),
-            html.Button("Submit", id="submit-button", n_clicks=0),
+            html.Button("Submit", id="button-insert-dish", n_clicks=0),
             html.Div(id="output-state"),
         ]
     )
@@ -20,7 +20,7 @@ def layout():
 
 @dash.callback(
     Output("output-state", "children"),
-    [Input("submit-button", "n_clicks")],
+    [Input("button-insert-dish", "n_clicks")],
     [State("dish-name", "value")],
 )
 def update_output(n_clicks, dish_name):
