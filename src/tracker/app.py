@@ -6,12 +6,12 @@ from dash import Dash, dcc, html
 sys.path.append("../src")
 from database.utils.connection import RecipeDBAccess
 
-app = Dash(__name__, use_pages=True)
+app = Dash(__name__, use_pages=True, suppress_callback_exceptions=True)
 app.layout = html.Div(
     [
         html.H1("Multi-page app with Dash Pages"),
         html.Div(
-            [
+            children=[
                 html.Div(
                     dcc.Link(
                         f"{page['name']} - {page['path']}", href=page["relative_path"]
