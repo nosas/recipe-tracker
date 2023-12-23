@@ -1,12 +1,14 @@
-from typing import Sequence, Type
+from typing import Any, Sequence, Type, TypeVar
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session, sessionmaker
 
-from database.schema.models import Base
+from database.schema.models import Base, Dish, Recipe
 
 TEST_DB = "test_db"
 PROD_DB = "prod_db"
+
+BASE_HAS_ID = TypeVar("BASE_HAS_ID", Dish, Recipe)
 
 
 class RecipeDBAccess:
@@ -105,3 +107,30 @@ class RecipeDBAccess:
             session.commit()
             session.refresh(obj)
             return obj
+
+    def get_one_by_id(
+        self, obj_type: Type[BASE_HAS_ID], obj_id: int
+    ) -> BASE_HAS_ID | None:
+        """Gets a single object from the database by id
+
+        Args:
+            obj_type (Type[BASE_HAS_ID]): The type of object to get
+            obj_id (int): The id of the object to get
+
+        Returns:
+            BASE_HAS_ID | None: The object if it exists, otherwise None
+        """
+        with self.get_session() as session:
+            return session.query(obj_type).filter(obj_type.id == obj_id).one_or_none()
+
+    def get_all(self, obj_type: Type[Base]) -> Sequence[Base]:
+        """Gets all objects of a given type from the database
+
+        Args:
+            obj_type (Type[Base]): The type of object to get
+
+        Returns:
+            Sequence[Base]: All objects of the given type
+        """
+        with self.get_session() as session:
+            return session.query(obj_type).all()
