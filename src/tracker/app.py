@@ -20,6 +20,7 @@ app.layout = html.Div(
                 for page in dash.page_registry.values()
             ]
         ),
+        html.Hr(),
         dash.page_container,
     ]
 )

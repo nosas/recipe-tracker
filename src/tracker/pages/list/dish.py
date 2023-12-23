@@ -5,9 +5,7 @@ from dash.dependencies import Input, Output
 from database.schema.models import Dish
 from database.utils.connection import RecipeDBAccess
 
-# Only register this page if it is not already registered
-if __name__ not in dash.page_registry:
-    dash.register_page(__name__)
+dash.register_page(__name__, path="/list/dish")
 
 
 def layout():
@@ -32,7 +30,7 @@ def get_dish_list():
 
 def display_dish_list(dishes):
     return html.Ul(
-        [html.Li(html.A(dish.name, href=f"/dish?id={dish.id}")) for dish in dishes]
+        [html.Li(html.A(dish.name, href=f"/dish/{dish.id}")) for dish in dishes]
     )
 
 
