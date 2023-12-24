@@ -18,7 +18,8 @@ class Base(DeclarativeBase):
 class Dish(IDMixin, Base):
     __tablename__ = "dishes"
 
-    name = mapped_column(String(255), nullable=False)
+    name = mapped_column(Text, nullable=False)
+    notes = mapped_column(Text, nullable=True)
     created_at = mapped_column(DateTime, nullable=False, server_default=func.now())
 
     recipes = relationship("DishRecipe", back_populates="dish")

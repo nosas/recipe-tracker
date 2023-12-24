@@ -1,6 +1,8 @@
+import re
 from typing import Optional
+
 import dash
-from dash import html
+from dash import dcc, html
 
 from database.schema.models import Dish
 from database.utils.connection import RecipeDBAccess
@@ -19,6 +21,7 @@ def layout(dish_id: Optional[int] = None):
         )
     else:
         dish = get_dish_by_id(dish_id=dish_id)
+        notes_with_links = re.sub(r"(https?://\S+)", r"[\1](\1)", dish.notes)
         return html.Div(
             [
                 html.H1(
@@ -30,6 +33,7 @@ def layout(dish_id: Optional[int] = None):
                         ),
                     ]
                 ),
+                dcc.Markdown(notes_with_links),
             ]
         )
 
