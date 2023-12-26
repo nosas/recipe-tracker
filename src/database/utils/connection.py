@@ -8,7 +8,8 @@ from database.schema.models import Base, Dish, Recipe
 TEST_DB = "test_db"
 PROD_DB = "prod_db"
 
-BASE_HAS_ID = TypeVar("BASE_HAS_ID", Dish, Recipe)
+ENTRY = TypeVar("ENTRY", Dish, Recipe)
+ENTRY_HAS_ID = TypeVar("ENTRY_HAS_ID", Dish, Recipe)
 
 
 class RecipeDBAccess:
@@ -76,31 +77,31 @@ class RecipeDBAccess:
         else:
             print("Tables not dropped, force=True to drop tables")
 
-    def insert_one(self, obj: Base) -> None:
+    def insert_one(self, obj: ENTRY) -> None:
         """Inserts a single object into the database
 
         Args:
-            obj (Base): The object to insert
+            obj (ENTRY): The object to insert
         """
         with self.get_session() as session:
             session.add(obj)
             session.commit()
 
-    def insert_many(self, objs: Sequence[Base]) -> None:
+    def insert_many(self, objs: Sequence[ENTRY]) -> None:
         """Inserts multiple objects into the database
 
         Args:
-            objs (Sequence[Type[Base]]): The objects to insert
+            objs (Sequence[Type[ENTRY]]): The objects to insert
         """
         with self.get_session() as session:
             session.add_all(objs)
             session.commit()
 
-    def upsert(self, obj: Base) -> Base:
+    def upsert(self, obj: ENTRY) -> ENTRY:
         """Inserts or updates an object in the database
 
         Args:
-            obj (Base): The object to insert or update
+            obj (ENTRY): The object to insert or update
         """
         with self.get_session() as session:
             obj = session.merge(obj)
@@ -109,28 +110,28 @@ class RecipeDBAccess:
             return obj
 
     def get_one_by_id(
-        self, obj_type: Type[BASE_HAS_ID], obj_id: int
-    ) -> BASE_HAS_ID | None:
+        self, obj_type: Type[ENTRY_HAS_ID], obj_id: int
+    ) -> ENTRY_HAS_ID | None:
         """Gets a single object from the database by id
 
         Args:
-            obj_type (Type[BASE_HAS_ID]): The type of object to get
+            obj_type (Type[ENTRY_HAS_ID]): The type of object to get
             obj_id (int): The id of the object to get
 
         Returns:
-            BASE_HAS_ID | None: The object if it exists, otherwise None
+            ENTRY_HAS_ID | None: The object if it exists, otherwise None
         """
         with self.get_session() as session:
             return session.query(obj_type).filter(obj_type.id == obj_id).one_or_none()
 
-    def get_all(self, obj_type: Type[Base]) -> Sequence[Base]:
+    def get_all(self, obj_type: Type[ENTRY]) -> Sequence[ENTRY]:
         """Gets all objects of a given type from the database
 
         Args:
-            obj_type (Type[Base]): The type of object to get
+            obj_type (Type[ENTRY]): The type of object to get
 
         Returns:
-            Sequence[Base]: All objects of the given type
+            Sequence[ENTRY]: All objects of the given type
         """
         with self.get_session() as session:
             return session.query(obj_type).all()
