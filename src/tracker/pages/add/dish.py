@@ -3,7 +3,7 @@ from dash import dcc, html
 from dash.dependencies import Input, Output, State
 
 from database.schema.models import Dish
-from database.utils.connection import RecipeDBAccess
+from tracker.pages.common.dish_utils import make_html_dish_form, upsert_dish
 
 dash.register_page(__name__)
 
@@ -12,19 +12,7 @@ def layout():
     return html.Div(
         [
             html.H1("Add Dish"),
-            html.Label("Dish Name"),
-            dcc.Input(id="dish-name", type="text", placeholder="Enter dish name"),
-            html.Div(
-                [
-                    html.Label("Dish Notes"),
-                    dcc.Textarea(
-                        id="dish-notes",
-                        placeholder="Enter recipe URLs, steps, changes to the recipe, etc.",
-                        rows=20,
-                        cols=100,
-                    ),
-                ]
-            ),
+            make_html_dish_form(),
             html.Button("Insert Dish", id="button-insert-dish", n_clicks=0),
             html.Div(id="output-state"),
         ]
@@ -38,16 +26,12 @@ def layout():
 )
 def update_output(n_clicks, dish_name, dish_notes):
     if n_clicks > 0:
-        # Connect to the database
-        db = RecipeDBAccess.get_instance(
-            username="test_user",
-            password="postgresql",
-            prod_db=False,
-        )
-
-        # Insert the new dish
         dish = Dish(name=dish_name, notes=dish_notes)
-        db.insert_one(dish)
 
-        return f"Dish {dish_name} added successfully!"
+        try:
+            new_dish = upsert_dish(dish=dish)
+            return dcc.Location(href=f"/dish/{new_dish.id}", id="redirect-get-dish")
+        except Exception as e:
+            return f"Error: {e}"
+
     return ""

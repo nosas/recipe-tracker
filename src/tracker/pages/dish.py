@@ -6,50 +6,21 @@ from dash import dcc, html
 from dash.dependencies import Input, Output, State
 
 from database.schema.models import Dish
-from database.utils.connection import RecipeDBAccess
+from tracker.pages.common.dish_utils import (
+    get_dish_by_id,
+    get_dish_id_from_pathname,
+    handle_no_dish_id,
+    make_html_dish_header,
+)
 
 dash.register_page(__name__, path="/dish/", path_template="/dish/<dish_id>/")
-
-
-def get_dish_by_id(dish_id):
-    db_access = RecipeDBAccess.get_instance(
-        username="test_user",
-        password="postgresql",
-        prod_db=False,
-    )
-    return db_access.get_one_by_id(obj_type=Dish, obj_id=dish_id)
-
-
-def get_dish_id_from_pathname(pathname) -> str | None:
-    res = re.search(r"/dish/(\d+)/?", pathname)
-    if res is None:
-        return None
-    return res.group(1)
-
-
-def handle_no_dish_id() -> html.Div:
-    return html.Div(
-        [
-            html.H1("List of Dishes"),
-            html.Button("Refresh", id="refresh-button"),
-            html.Div(id="dish-list"),
-        ]
-    )
 
 
 def display_dish_info(dish: Dish) -> html.Div:
     notes_with_links = re.sub(r"(https?://\S+)", r"[\1](\1)", dish.notes)
     return html.Div(
         [
-            html.H1(
-                [
-                    f"Dish#{dish.id}: ",
-                    html.Span(
-                        dish.name,
-                        style={"font-style": "italic", "font-size": "smaller"},
-                    ),
-                ]
-            ),
+            make_html_dish_header(dish=dish),
             html.Button("Edit", id="edit-button", n_clicks=0),
             dcc.Markdown(notes_with_links),
             dcc.Location(id="url-get-dish", refresh=True),
