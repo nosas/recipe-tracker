@@ -40,12 +40,8 @@ class Recipe(IDMixin, Base):
 class DishRecipe(Base):
     __tablename__ = "dish_recipes"
 
-    dish_id = mapped_column(
-        Integer, ForeignKey(f"{SCHEMA}.dishes.id"), primary_key=True
-    )
-    recipe_id = mapped_column(
-        Integer, ForeignKey(f"{SCHEMA}.recipes.id"), primary_key=True
-    )
+    dish_id = mapped_column(Integer, ForeignKey(f"{SCHEMA}.dishes.id"), primary_key=True)
+    recipe_id = mapped_column(Integer, ForeignKey(f"{SCHEMA}.recipes.id"), primary_key=True)
 
     dish = relationship("Dish", back_populates="recipes")
     recipe = relationship("Recipe", back_populates="dishes")
@@ -80,12 +76,8 @@ class Event(IDMixin, Base):
 class PeopleReview(Base):
     __tablename__ = "people_reviews"
 
-    people_id = mapped_column(
-        Integer, ForeignKey(f"{SCHEMA}.people.id"), primary_key=True
-    )
-    review_id = mapped_column(
-        Integer, ForeignKey(f"{SCHEMA}.reviews.id"), primary_key=True
-    )
+    people_id = mapped_column(Integer, ForeignKey(f"{SCHEMA}.people.id"), primary_key=True)
+    review_id = mapped_column(Integer, ForeignKey(f"{SCHEMA}.reviews.id"), primary_key=True)
 
     person = relationship("Person", back_populates="reviews")
     review = relationship("Review", back_populates="people")
@@ -94,12 +86,8 @@ class PeopleReview(Base):
 class EventDish(Base):
     __tablename__ = "event_dishes"
 
-    event_id = mapped_column(
-        Integer, ForeignKey(f"{SCHEMA}.events.id"), primary_key=True
-    )
-    dish_id = mapped_column(
-        Integer, ForeignKey(f"{SCHEMA}.dishes.id"), primary_key=True
-    )
+    event_id = mapped_column(Integer, ForeignKey(f"{SCHEMA}.events.id"), primary_key=True)
+    dish_id = mapped_column(Integer, ForeignKey(f"{SCHEMA}.dishes.id"), primary_key=True)
 
     event = relationship("Event", back_populates="dishes")
     dish = relationship("Dish", back_populates="events")

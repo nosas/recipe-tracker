@@ -8,9 +8,7 @@ dash.register_page(__name__, path="/list/dish")
 
 
 def display_dish_list(dishes):
-    return html.Ul(
-        [html.Li(html.A(dish.name, href=f"/dish/{dish.id}")) for dish in dishes]
-    )
+    return html.Ul([html.Li(html.A(dish.name, href=f"/dish/{dish.id}")) for dish in dishes])
 
 
 @dash.callback(
