@@ -7,9 +7,30 @@ services:
       - "5432:5432"
     environment:
       - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - TEST_POSTGRES_DB=${TEST_POSTGRES_DB:-test_db}
+      - TEST_POSTGRES_USER=${TEST_POSTGRES_USER:-test_user}
+      - TEST_POSTGRES_PASSWORD=${TEST_POSTGRES_PASSWORD:-postgresql}
     volumes:
       - postgres_data:/var/lib/postgresql/data
+
+  dash-app:
+    build: ./src
+    ports:
+      - "8050:8050"
+    environment:
+      - TESTING=${TESTING:-True}
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - TEST_POSTGRES_DB=${TEST_POSTGRES_DB:-test_db}
+      - TEST_POSTGRES_USER=${TEST_POSTGRES_USER:-test_user}
+      - TEST_POSTGRES_PASSWORD=${TEST_POSTGRES_PASSWORD:-postgres}
+
+    depends_on:
+      - db
+
 
 volumes:
   postgres_data:
