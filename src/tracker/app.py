@@ -1,9 +1,14 @@
+import logging
 import sys
 
 import dash
 from dash import Dash, dcc, html
 
-sys.path.append("../src")
+logging.basicConfig(level=logging.INFO)
+
+logger = logging.getLogger(__name__)
+
+sys.path.append(".")  # Adds higher directory to python modules path.
 from database.utils.connection import RecipeDBAccess
 
 app = Dash(__name__, use_pages=True, suppress_callback_exceptions=True)
@@ -12,11 +17,7 @@ app.layout = html.Div(
         html.H1("Multi-page app with Dash Pages"),
         html.Div(
             children=[
-                html.Div(
-                    dcc.Link(
-                        f"{page['name']} - {page['path']}", href=page["relative_path"]
-                    )
-                )
+                html.Div(dcc.Link(f"{page['name']} - {page['path']}", href=page["relative_path"]))
                 for page in dash.page_registry.values()
             ]
         ),
@@ -27,11 +28,11 @@ app.layout = html.Div(
 
 
 if __name__ == "__main__":
-    db = RecipeDBAccess.get_instance(
-        username="test_user",
-        password="postgresql",
-        prod_db=False,
-    )
-    db.create_tables()
-    app.run_server(debug=True)
-    db.drop_tables(force=True)
+    _db = RecipeDBAccess.from_env()
+    if _db._credentials.is_production:
+        logging.info("Using production database")
+    else:
+        logging.info("Using test database")
+    _db.create_tables()
+    app.run_server(host="0.0.0.0", debug=True)
+    # _db.drop_tables(force=True)

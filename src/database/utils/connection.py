@@ -1,15 +1,104 @@
-from typing import Any, Sequence, Type, TypeVar
+from os import getenv
+from typing import Sequence, Type, TypeVar
 
+from dotenv import load_dotenv
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session, sessionmaker
 
 from database.schema.models import Base, Dish, Recipe
 
-TEST_DB = "test_db"
-PROD_DB = "prod_db"
-
 ENTRY = TypeVar("ENTRY", Dish, Recipe)
 ENTRY_HAS_ID = TypeVar("ENTRY_HAS_ID", Dish, Recipe)
+
+
+class Credentials:
+    def __init__(
+        self,
+        username: str,
+        password: str,
+        host: str,
+        db: str,
+        is_production: bool,
+    ):
+        """Initializes the credentials
+
+        Args:
+            username (str): Username for the database
+            password (str): Password for the database
+            host (str): Host to connect to
+            db (str): Database to connect to
+            is_production (bool): Whether or not the credentials are for production
+        """
+
+        try:
+            self.validate_credentials(username=username, password=password, host=host, db=db)
+        except ValueError as e:
+            raise ValueError(
+                "Environment variables not set. "
+                "Please set POSTGRES_USER, POSTGRES_PASSWORD, POSTGRES_HOST, POSTGRES_DB. "
+                "If you are running tests, set TESTING=True, TEST_POSTGRES_USER, "
+                "TEST_POSTGRES_PASSWORD, TEST_POSTGRES_HOST, and TEST_POSTGRES_DB."
+            )
+
+        self.username = username
+        self.password = password
+        self.host = host
+        self.db = db
+        self._is_production = is_production
+
+    @classmethod
+    def from_env(cls: Type["Credentials"]) -> "Credentials":
+        """Returns an instance of the class using environment variables
+
+        Returns:
+            Credentials: An instance of the class
+        """
+        load_dotenv()
+
+        is_production = getenv("TESTING", "True") == "False"
+
+        username = getenv("TEST_POSTGRES_USER" if not is_production else "POSTGRES_USER", "")
+        password = getenv(
+            "TEST_POSTGRES_PASSWORD" if not is_production else "POSTGRES_PASSWORD", ""
+        )
+        host = getenv("TEST_POSTGRES_HOST" if not is_production else "POSTGRES_HOST", "")
+        db = getenv("TEST_POSTGRES_DB" if not is_production else "POSTGRES_DB", "")
+
+        return cls(
+            username=username,
+            password=password,
+            host=host,
+            db=db,
+            is_production=is_production,
+        )
+
+    @classmethod
+    def validate_credentials(
+        cls: Type["Credentials"],
+        username: str,
+        password: str,
+        host: str,
+        db: str,
+    ) -> None:
+        """Validate that environment variables are set
+
+        Args:
+            username (str): Username for the database
+            password (str): Password for the database
+            host (str): Host to connect to
+            db (str): Database to connect to
+
+        Raises:
+            ValueError: If any of the environment variables are None
+        """
+        vars = [username, password, host, db]
+        if any([var == "" for var in vars]):
+            missing = [var for var in ["username", "password", "host", "db"] if var == ""]
+            raise ValueError("The following variables are missing: {}".format(", ".join(missing)))
+
+    @property
+    def is_production(self) -> bool:
+        return self._is_production is True
 
 
 class RecipeDBAccess:
@@ -23,38 +112,47 @@ class RecipeDBAccess:
 
     _instance = None
 
-    def __init__(self, username: str, password: str, prod_db: bool = False):
+    def __init__(self, credentials: Credentials):
         """Initializes the database connection
 
         Args:
-            username (str): Username for the database
-            password (str): Password for the database
-            prod_db (bool, optional): Whether to use the production database. Defaults to False.
+            credentials (Credentials): The credentials for the database
         """
-        db = PROD_DB if prod_db else TEST_DB
+        self._credentials = credentials
+        username = credentials.username
+        password = credentials.password
+        host = credentials.host
+        db = credentials.db
+
         print(f"Connecting to {db} database")
         self._engine = create_engine(
-            f"postgresql+psycopg2://{username}:{password}@localhost/{db}",
+            f"postgresql+psycopg2://{username}:{password}@{host}/{db}",
             echo=False,
         )
         self._Session = sessionmaker(bind=self._engine)
 
     @classmethod
-    def get_instance(
-        cls: Type["RecipeDBAccess"], username: str, password: str, prod_db: bool = False
-    ) -> "RecipeDBAccess":
+    def from_env(cls: Type["RecipeDBAccess"]) -> "RecipeDBAccess":
+        """Returns an instance of the class using environment variables
+
+        Returns:
+            RecipeDBAccess: An instance of the class
+        """
+        credentials = Credentials.from_env()
+        return cls.get_instance(credentials=credentials)
+
+    @classmethod
+    def get_instance(cls: Type["RecipeDBAccess"], credentials: Credentials) -> "RecipeDBAccess":
         """Returns the singleton instance of the class
 
         Args:
-            username (str): Username for the database
-            password (str): Password for the database
-            prod_db (bool, optional): Whether to use the production database. Defaults to False.
+            credentials (Credentials): The credentials for the database
 
         Returns:
             RecipeDBAccess: The singleton instance of the class
         """
         if cls._instance is None:
-            cls._instance = cls(username=username, password=password, prod_db=prod_db)
+            cls._instance = cls(credentials=credentials)
         return cls._instance
 
     def get_session(self) -> Session:
@@ -109,9 +207,7 @@ class RecipeDBAccess:
             session.refresh(obj)
             return obj
 
-    def get_one_by_id(
-        self, obj_type: Type[ENTRY_HAS_ID], obj_id: int
-    ) -> ENTRY_HAS_ID | None:
+    def get_one_by_id(self, obj_type: Type[ENTRY_HAS_ID], obj_id: int) -> ENTRY_HAS_ID | None:
         """Gets a single object from the database by id
 
         Args:

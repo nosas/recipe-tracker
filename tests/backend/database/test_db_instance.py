@@ -1,11 +1,16 @@
-from database.utils.connection import RecipeDBAccess
+from database.utils.connection import Credentials, RecipeDBAccess
 
 
 def test_get_instance(test_db):
     """Verify that the singleton instance is returned"""
     assert isinstance(test_db, RecipeDBAccess)
-    assert test_db == RecipeDBAccess.get_instance(
+    credentials = Credentials(
         username="test_user",
         password="postgresql",
-        prod_db=False,
+        host="localhost",
+        db="test_db",
+        is_production=False,
     )
+    assert test_db == RecipeDBAccess.get_instance(
+        credentials=credentials
+    ), "Singleton instance not returned"
