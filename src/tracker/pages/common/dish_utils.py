@@ -57,11 +57,7 @@ def make_html_dish_form(dish: Optional[Dish] = None) -> html.Div:
 
 
 def get_dish_by_id(dish_id):
-    db_access = RecipeDBAccess.get_instance(
-        username="test_user",
-        password="postgresql",
-        prod_db=False,
-    )
+    db_access = RecipeDBAccess.from_env()
     return db_access.get_one_by_id(obj_type=Dish, obj_id=dish_id)
 
 
@@ -83,21 +79,13 @@ def handle_no_dish_id() -> html.Div:
 
 
 def get_dish_list():
-    db_access = RecipeDBAccess.get_instance(
-        username="test_user",
-        password="postgresql",
-        prod_db=False,
-    )
+    db_access = RecipeDBAccess.from_env()
     dishes = db_access.get_all(Dish)
     return dishes
 
 
 def upsert_dish(dish: Dish) -> Dish:
     # Function to update the dish in the database
-    db_access = RecipeDBAccess.get_instance(
-        username="test_user",
-        password="postgresql",
-        prod_db=False,
-    )
+    db_access = RecipeDBAccess.from_env()
     new_dish = db_access.upsert(obj=dish)
     return new_dish
